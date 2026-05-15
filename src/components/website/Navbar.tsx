@@ -4,101 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ChevronDown,
-  Menu,
-  X,
-  Phone,
-  Activity,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronDown, Menu, X, Phone, ChevronRight, Stethoscope } from "lucide-react";
 import Image from "next/image";
-
-const navItems = [
-  {
-    label: "Home",
-    href: "/",
-  },
-  {
-    label: "About",
-    href: "/about",
-    children: [
-      { label: "About CCLL", href: "/about" },
-      { label: "Our History", href: "/about/history" },
-      { label: "From MD's Desk", href: "/about/mds-desk" },
-      { label: "Mission & Vision", href: "/about/mission-vision" },
-      { label: "Industry Recognitions", href: "/about/recognitions" },
-    ],
-  },
-  {
-    label: "Range of Services",
-    href: "/services",
-    children: [
-      { label: "Pathology", href: "/services/pathology" },
-      { label: "Radiology & Imaging", href: "/services/radiology" },
-      { label: "Cardiology", href: "/services/cardiology" },
-      { label: "Ear Nose & Throat (ENT)", href: "/services/ent" },
-      { label: "Gastroenterology", href: "/services/gastroenterology" },
-      { label: "Neurophysiology", href: "/services/neurophysiology" },
-      { label: "Ultrasonography", href: "/services/ultrasonography" },
-    ],
-  },
-  {
-    label: "Doctors",
-    href: "/doctors",
-    grid: true,
-    children: [
-      { label: "Medicine", href: "/doctors?dept=Medicine" },
-      { label: "Surgery", href: "/doctors?dept=Surgery" },
-      { label: "Pediatric Surgery", href: "/doctors?dept=Pediatric Surgery" },
-      {
-        label: "Burn & Plastic Surgery",
-        href: "/doctors?dept=Burn & Plastic Surgery",
-      },
-      { label: "Neurosurgery", href: "/doctors?dept=Neurosurgery" },
-      { label: "Cardiac & Medicine", href: "/doctors?dept=Cardiac & Medicine" },
-      { label: "Orthopedic", href: "/doctors?dept=Orthopedic" },
-      { label: "ENT", href: "/doctors?dept=ENT" },
-      { label: "Cancer", href: "/doctors?dept=Cancer" },
-      { label: "Psychiatry", href: "/doctors?dept=Psychiatry" },
-      { label: "Gynae & Obs", href: "/doctors?dept=Gynae & Obs" },
-      { label: "Paediatric", href: "/doctors?dept=Paediatric" },
-      { label: "Kidney", href: "/doctors?dept=Kidney" },
-      { label: "Neuromedicine", href: "/doctors?dept=Neuromedicine" },
-      { label: "Dental", href: "/doctors?dept=Dental" },
-      { label: "Skin & VD", href: "/doctors?dept=Skin & VD" },
-    ],
-  },
-  {
-    label: "Our Units",
-    href: "/units",
-    children: [
-      { label: "Specialized Hospital", href: "/units/specialized-hospital" },
-      { label: "Eye Hospital", href: "/units/eye-hospital" },
-      { label: "Oro Dental Clinic", href: "/units/oro-dental" },
-      { label: "IVF Center", href: "/units/ivf-center" },
-    ],
-  },
-  {
-    label: "Our Branches",
-    href: "/branches",
-    branches: true,
-    children: [
-      { label: "Halisahar", href: "/branches/halisahar" },
-      { label: "Bondortila", href: "/branches/bondortila" },
-      { label: "Anowara", href: "/branches/anowara" },
-      { label: "Potiya", href: "/branches/potiya" },
-      { label: "Boalkhali", href: "/branches/boalkhali" },
-      { label: "Chokoria", href: "/branches/chokoria" },
-      { label: "Cox's Bazar", href: "/branches/coxs-bazar" },
-      { label: "Hathazari", href: "/branches/hathazari" },
-      { label: "Nazirhat", href: "/branches/nazirhat" },
-      { label: "Rangamati", href: "/branches/rangamati" },
-      { label: "Feni", href: "/branches/feni" },
-    ],
-  },
-  { label: "Contact", href: "/contact" },
-];
+import { navItems } from "@/lib/navItems";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -113,97 +21,100 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Lock body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
   return (
     <>
       {/* Top Bar */}
       <div className="bg-blue-800 text-white text-xs py-2 px-4 hidden md:block">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <p>Welcome to CHEVRON</p>
-          <div className="flex items-center gap-2">
-            <Phone className="w-3 h-3" />
-            <p>
-              <span className="font-bold">Hotline: :</span> 01755 666969, 01713
-              487903
-            </p>
-            <p>
-              <span className="font-bold">Doctor Info : </span> 01756 203720,
-              01713 487901 & 01755 666 956
-            </p>
+          <p className="font-medium tracking-wide">Welcome to CCLL — Chittagong Clinical & Diagnostic Laboratory Ltd.</p>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-blue-700 rounded-full flex items-center justify-center">
+                <Phone className="w-3 h-3" />
+              </div>
+              <div>
+                <span className="text-blue-300 font-semibold">Hotline: </span>
+                <span>01755-666969, 01713-487903</span>
+              </div>
+            </div>
+            <div className="w-px h-4 bg-blue-600" />
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-blue-700 rounded-full flex items-center justify-center">
+                <Stethoscope className="w-3 h-3" />
+              </div>
+              <div>
+                <span className="text-blue-300 font-semibold">Doctor Info: </span>
+                <span>01756-203720, 01713-487901</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Navbar */}
-      <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-sm shadow-slate-200/50" : "bg-white"}`}
-      >
+      <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-sm shadow-slate-200/50" : "bg-white"}`}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
+
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-full h-auto flex items-center justify-center">
-                <Image
-                  src="https://res.cloudinary.com/dtppzdxgj/image/upload/v1778815755/ccll/gallery/pfoe4g3qudnngjsii2bb.png"
-                  alt="CCLL Logo"
-                  width={32}
-                  height={32}
-                  className="w-12 h-auto"
-                />
-                <Activity className="w-6 h-6 text-white" />
-              </div>
+            <Link href="/" className="flex-shrink-0">
+              <Image
+                src="https://res.cloudinary.com/dtppzdxgj/image/upload/v1778815755/ccll/gallery/pfoe4g3qudnngjsii2bb.png"
+                alt="CCLL Logo"
+                width={120}
+                height={48}
+                className="h-10 w-auto object-contain"
+                priority
+              />
             </Link>
 
             {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center justify-center gap-1">
+            <div className="hidden lg:flex items-center h-16">
               {navItems.map((item) => (
-                <div
-                  key={item.label}
-                  className="relative"
-                  onMouseEnter={() =>
-                    item.children && setActiveDropdown(item.label)
-                  }
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  <Link
-                    href={item.href}
-                    className={`flex items-center justify-between px-4 text-sm font-medium hover:text-white hover:py-4 hover:bg-blue-800 transition-all duration-200 ${
-                      pathname === item.href
-                        ? "py-4 text-blue-50 bg-blue-800"
-                        : "text-slate-700 hover:text-blue-600 hover:bg-blue-50"
-                    }`}
-                  >
+                <div key={item.label} className="relative h-full flex items-center"
+                  onMouseEnter={() => item.children && setActiveDropdown(item.label)}
+                  onMouseLeave={() => setActiveDropdown(null)}>
+
+                  <Link href={item.href}
+                    className={`flex items-center gap-1 px-4 h-full text-sm font-medium transition-all duration-200 border-b-2 ${
+                      pathname === item.href || pathname.startsWith(item.href + "/")
+                        ? "text-blue-50 border-blue-700 bg-blue-800"
+                        : "text-slate-700 border-transparent hover:text-blue-700 hover:border-blue-700 hover:bg-blue-50/50"
+                    }`}>
                     {item.label}
-                    {item.children && <ChevronDown className="w-3.5 h-3.5" />}
+                    {item.children && (
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === item.label ? "rotate-180" : ""}`} />
+                    )}
                   </Link>
 
                   {/* Dropdown */}
                   <AnimatePresence>
                     {item.children && activeDropdown === item.label && (
                       <motion.div
-                        initial={{ opacity: 0, y: 8 }}
+                        initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
+                        exit={{ opacity: 0, y: 6 }}
                         transition={{ duration: 0.15 }}
-                        className={`absolute top-full left-0 mt-4 bg-white border border-slate-200 rounded-xl shadow-sm shadow-slate-200/60 w-full p-4 z-50 flex flex-col gap-2 ${
+                        className={`absolute top-full mt-0 bg-white border border-slate-100 rounded-b-2xl shadow-xs shadow-slate-200/60 z-50 p-3 ${
                           item.grid
-                            ? "grid grid-cols-4 gap-2 min-w-5xl right-0 left-auto"
+                            ? "grid grid-cols-1 lg:grid-cols-4 gap-3.5 w-4xl right-0 -left-100 mx-auto h-auto"
                             : item.branches
-                              ? "grid grid-cols-3 gap-2 min-w-2xl right-0 left-auto"
-                              : "w-xs"
-                        }`}
-                      >
+                              ? "grid grid-cols-1 lg:grid-cols-3 gap-3.5 w-xl right-0 left-auto mx-auto"
+                              : "flex flex-col gap-2.5 w-72 left-0 right-auto mx-auto"
+                        }`}>
                         {item.children.map((child) => (
-                          <Link
-                            key={child.label}
-                            href={child.href}
-                            className="group/item flex items-center gap-2 rounded-lg border border-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-300 hover:border-blue-200 hover:bg-blue-50"
-                          >
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-blue-700 text-blue-700 hover:border-blue-800 hover:bg-blue-800 hover:text-white transition-colors duration-300 group-hover/item:border-blue-800 group-hover/item:bg-blue-800 group-hover/item:text-white">
-                              <ChevronRight className="h-4 w-4" />
+                          <Link key={child.label} href={child.href}
+                            className="w-full group flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-xl text-sm text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-150">
+                            <div className="w-5 h-5 rounded-full border border-blue-200 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-700 group-hover:border-blue-700 transition-all">
+                              <ChevronRight className="w-3 h-3 text-blue-600 group-hover:text-white" />
                             </div>
-                            <span className="group-hover/item:translate-x-1 transition-transform duration-300">
-                              {child.label}
-                            </span>
+                            <span className="group-hover:translate-x-0.5 transition-transform duration-150 font-medium">{child.label}</span>
                           </Link>
                         ))}
                       </motion.div>
@@ -214,84 +125,130 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Toggle */}
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-700"
-            >
-              {mobileOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+            <button onClick={() => setMobileOpen(true)}
+              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all">
+              <Menu className="w-5 h-5" />
             </button>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileOpen && (
+      {/* Mobile Menu Overlay + Drawer */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Overlay */}
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden border-t border-slate-100 bg-white overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+            />
+
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed top-0 left-0 h-full w-80 bg-white z-50 lg:hidden flex flex-col justify-center shadow-2xl"
             >
-              <div className="px-4 py-3 space-y-1">
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-blue-800">
+                <Image
+                  src="https://res.cloudinary.com/dtppzdxgj/image/upload/v1778815755/ccll/gallery/pfoe4g3qudnngjsii2bb.png"
+                  alt="CCLL Logo"
+                  width={100}
+                  height={40}
+                  className="h-8 w-auto object-contain brightness-0 invert"
+                />
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-700 hover:bg-blue-600 text-white transition-all">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Nav Items */}
+              <div className="flex-1 items-center justify-center overflow-y-auto py-3 px-3">
                 {navItems.map((item) => (
-                  <div key={item.label}>
+                  <div key={item.label} className="mb-1">
                     {item.children ? (
                       <>
                         <button
-                          onClick={() =>
-                            setMobileExpanded(
-                              mobileExpanded === item.label ? null : item.label,
-                            )
-                          }
-                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
-                        >
+                          onClick={() => setMobileExpanded(mobileExpanded === item.label ? null : item.label)}
+                          className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all">
                           {item.label}
-                          <ChevronDown
-                            className={`w-4 h-4 transition-transform ${mobileExpanded === item.label ? "rotate-180" : ""}`}
-                          />
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileExpanded === item.label ? "rotate-180 text-blue-600" : "text-slate-400"}`} />
                         </button>
+
                         <AnimatePresence>
                           {mobileExpanded === item.label && (
                             <motion.div
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: "auto" }}
                               exit={{ opacity: 0, height: 0 }}
-                              className="pl-4 space-y-1 overflow-hidden"
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden mx-2 mb-1"
                             >
-                              {item.children.map((child) => (
-                                <Link
-                                  key={child.label}
-                                  href={child.href}
-                                  onClick={() => setMobileOpen(false)}
-                                  className="block px-3 py-2 text-sm text-slate-600 hover:text-blue-600 rounded-lg hover:bg-blue-50"
-                                >
-                                  {child.label}
-                                </Link>
-                              ))}
+                              <div className={`pt-1 pb-2 grid gap-1 ${item.grid || item.branches ? "grid-cols-2" : "grid-cols-1"}`}>
+                                {item.children.map((child) => (
+                                  <Link key={child.label} href={child.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                                    {child.label}
+                                  </Link>
+                                ))}
+                              </div>
                             </motion.div>
                           )}
                         </AnimatePresence>
                       </>
                     ) : (
-                      <Link
-                        href={item.href}
+                      <Link href={item.href}
                         onClick={() => setMobileOpen(false)}
-                        className="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600"
-                      >
+                        className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                          pathname === item.href
+                            ? "bg-blue-800 text-blue-50"
+                            : "text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                        }`}>
                         {item.label}
                       </Link>
                     )}
                   </div>
                 ))}
               </div>
+
+              {/* Drawer Footer — Contact Info */}
+              <div className="border-t border-slate-100 bg-slate-50 px-5 py-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Hotline</p>
+                    <p className="text-sm font-bold text-slate-800">01755-666969</p>
+                    <p className="text-sm text-slate-600">01713-487903</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Stethoscope className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Doctor Info</p>
+                    <p className="text-sm font-bold text-slate-800">01756-203720</p>
+                    <p className="text-sm text-slate-600">01713-487901</p>
+                  </div>
+                </div>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
