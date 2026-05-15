@@ -78,8 +78,8 @@ export default function Footer() {
 
       <div className="border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-slate-500 text-sm">© 2025 CCLL. All rights reserved.</p>
-          <p className="text-slate-600 text-xs">Developed with ❤️ for better healthcare</p>
+          <p className="text-slate-500 text-sm">© 2026 CCLL. All rights reserved.</p>
+          <p className="text-slate-600 text-xs">Developed by Nexawebs❤️</p>
         </div>
       </div>
     </footer>
