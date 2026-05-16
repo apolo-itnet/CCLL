@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Shield, Clock, Award, Users } from "lucide-react";
 
 const stats = [
-  { label: "Expert Doctors", value: "50+", icon: Users },
+  { label: "Expert Doctors", value: "90+", icon: Users },
   { label: "Years Experience", value: "25+", icon: Award },
   { label: "Open Hours", value: "24/7", icon: Clock },
   { label: "Tests Available", value: "500+", icon: Shield },

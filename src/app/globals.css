@@ -73,3 +73,13 @@
   ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 }
+
+@layer utilities {
+  .container-lg {
+    @apply mx-auto w-full max-w-[95%] sm:max-w-[92%] lg:max-w-[90%] xl:max-w-[85%];
+  }
+
+  .container-md {
+    @apply mx-auto w-full max-w-[95%] sm:max-w-[92%] lg:max-w-7xl;
+  }
+}

@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Menu, X, Phone, ChevronRight, Stethoscope } from "lucide-react";
+import {
+  ChevronDown,
+  Menu,
+  X,
+  Phone,
+  ChevronRight,
+  Stethoscope,
+  Clock,
+} from "lucide-react";
 import Image from "next/image";
 import { navItems } from "@/lib/navItems";
 
@@ -24,7 +32,9 @@ export default function Navbar() {
   // Lock body scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileOpen]);
 
   return (
@@ -32,24 +42,32 @@ export default function Navbar() {
       {/* Top Bar */}
       <div className="bg-blue-800 text-white text-xs py-2 px-4 hidden md:block">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <p className="font-medium tracking-wide">Welcome to CCLL — Chittagong Clinical & Diagnostic Laboratory Ltd.</p>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6  flex items-center justify-center">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <span className="text-blue-300 font-medium">Opening Hours:</span>
+              <span> Every Day 7 AM – 10:30 PM</span>
+            </div>
+          </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-blue-700 rounded-full flex items-center justify-center">
-                <Phone className="w-3 h-3" />
+              <div className="w-6 h-6  flex items-center justify-center">
+                <Phone className="w-4 h-4" />
               </div>
-              <div>
-                <span className="text-blue-300 font-semibold">Hotline: </span>
+              <div className="flex items-center gap-1 text-sm">
+                <span className="text-blue-300 font-medium">Hotline: </span>
                 <span>01755-666969, 01713-487903</span>
               </div>
             </div>
             <div className="w-px h-4 bg-blue-600" />
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-blue-700 rounded-full flex items-center justify-center">
-                <Stethoscope className="w-3 h-3" />
+              <div className="w-6 h-6  flex items-center justify-center">
+                <Stethoscope className="w-4 h-4" />
               </div>
-              <div>
-                <span className="text-blue-300 font-semibold">Doctor Info: </span>
+              <div className="flex items-center gap-1 text-sm">
+                <span className="text-blue-300 font-medium">Doctor Info: </span>
                 <span>01756-203720, 01713-487901</span>
               </div>
             </div>
@@ -58,18 +76,19 @@ export default function Navbar() {
       </div>
 
       {/* Main Navbar */}
-      <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-sm shadow-slate-200/50" : "bg-white"}`}>
-        <div className="max-w-7xl mx-auto px-4">
+      <nav
+        className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-sm shadow-slate-200/50" : "bg-white"}`}
+      >
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-16">
-
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
+            <Link href="/" className="flex items-center h-full">
               <Image
-                src="https://res.cloudinary.com/dtppzdxgj/image/upload/v1778815755/ccll/gallery/pfoe4g3qudnngjsii2bb.png"
-                alt="CCLL Logo"
-                width={120}
-                height={48}
-                className="h-10 w-auto object-contain"
+                src={process.env.NEXT_PUBLIC_LOGO_URL!}
+                alt="Logo"
+                width={150}
+                height={40}
+                className="w-auto h-auto object-contain"
                 priority
               />
             </Link>
@@ -77,19 +96,28 @@ export default function Navbar() {
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center h-16">
               {navItems.map((item) => (
-                <div key={item.label} className="relative h-full flex items-center"
-                  onMouseEnter={() => item.children && setActiveDropdown(item.label)}
-                  onMouseLeave={() => setActiveDropdown(null)}>
-
-                  <Link href={item.href}
+                <div
+                  key={item.label}
+                  className="relative h-full flex items-center"
+                  onMouseEnter={() =>
+                    item.children && setActiveDropdown(item.label)
+                  }
+                  onMouseLeave={() => setActiveDropdown(null)}
+                >
+                  <Link
+                    href={item.href}
                     className={`flex items-center gap-1 px-4 h-full text-sm font-medium transition-all duration-200 border-b-2 ${
-                      pathname === item.href || pathname.startsWith(item.href + "/")
+                      pathname === item.href ||
+                      pathname.startsWith(item.href + "/")
                         ? "text-blue-50 border-blue-700 bg-blue-800"
                         : "text-slate-700 border-transparent hover:text-blue-700 hover:border-blue-700 hover:bg-blue-50/50"
-                    }`}>
+                    }`}
+                  >
                     {item.label}
                     {item.children && (
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === item.label ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === item.label ? "rotate-180" : ""}`}
+                      />
                     )}
                   </Link>
 
@@ -107,14 +135,20 @@ export default function Navbar() {
                             : item.branches
                               ? "grid grid-cols-1 lg:grid-cols-3 gap-3.5 w-xl right-0 left-auto mx-auto"
                               : "flex flex-col gap-2.5 w-72 left-0 right-auto mx-auto"
-                        }`}>
+                        }`}
+                      >
                         {item.children.map((child) => (
-                          <Link key={child.label} href={child.href}
-                            className="w-full group flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-xl text-sm text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-150">
+                          <Link
+                            key={child.label}
+                            href={child.href}
+                            className="w-full group flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-xl text-sm text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-150"
+                          >
                             <div className="w-5 h-5 rounded-full border border-blue-200 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-700 group-hover:border-blue-700 transition-all">
                               <ChevronRight className="w-3 h-3 text-blue-600 group-hover:text-white" />
                             </div>
-                            <span className="group-hover:translate-x-0.5 transition-transform duration-150 font-medium">{child.label}</span>
+                            <span className="group-hover:translate-x-0.5 transition-transform duration-150 font-medium">
+                              {child.label}
+                            </span>
                           </Link>
                         ))}
                       </motion.div>
@@ -125,8 +159,10 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Toggle */}
-            <button onClick={() => setMobileOpen(true)}
-              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all">
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
+            >
               <Menu className="w-5 h-5" />
             </button>
           </div>
@@ -166,7 +202,8 @@ export default function Navbar() {
                 />
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-700 hover:bg-blue-600 text-white transition-all">
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-700 hover:bg-blue-600 text-white transition-all"
+                >
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -178,10 +215,17 @@ export default function Navbar() {
                     {item.children ? (
                       <>
                         <button
-                          onClick={() => setMobileExpanded(mobileExpanded === item.label ? null : item.label)}
-                          className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all">
+                          onClick={() =>
+                            setMobileExpanded(
+                              mobileExpanded === item.label ? null : item.label,
+                            )
+                          }
+                          className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all"
+                        >
                           {item.label}
-                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileExpanded === item.label ? "rotate-180 text-blue-600" : "text-slate-400"}`} />
+                          <ChevronDown
+                            className={`w-4 h-4 transition-transform duration-200 ${mobileExpanded === item.label ? "rotate-180 text-blue-600" : "text-slate-400"}`}
+                          />
                         </button>
 
                         <AnimatePresence>
@@ -193,11 +237,16 @@ export default function Navbar() {
                               transition={{ duration: 0.2 }}
                               className="overflow-hidden mx-2 mb-1"
                             >
-                              <div className={`pt-1 pb-2 grid gap-1 ${item.grid || item.branches ? "grid-cols-2" : "grid-cols-1"}`}>
+                              <div
+                                className={`pt-1 pb-2 grid gap-1 ${item.grid || item.branches ? "grid-cols-2" : "grid-cols-1"}`}
+                              >
                                 {item.children.map((child) => (
-                                  <Link key={child.label} href={child.href}
+                                  <Link
+                                    key={child.label}
+                                    href={child.href}
                                     onClick={() => setMobileOpen(false)}
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all">
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all"
+                                  >
                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
                                     {child.label}
                                   </Link>
@@ -208,13 +257,15 @@ export default function Navbar() {
                         </AnimatePresence>
                       </>
                     ) : (
-                      <Link href={item.href}
+                      <Link
+                        href={item.href}
                         onClick={() => setMobileOpen(false)}
                         className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
                           pathname === item.href
                             ? "bg-blue-800 text-blue-50"
                             : "text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                        }`}>
+                        }`}
+                      >
                         {item.label}
                       </Link>
                     )}
@@ -229,8 +280,12 @@ export default function Navbar() {
                     <Phone className="w-4 h-4 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Hotline</p>
-                    <p className="text-sm font-bold text-slate-800">01755-666969</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                      Hotline
+                    </p>
+                    <p className="text-sm font-bold text-slate-800">
+                      01755-666969
+                    </p>
                     <p className="text-sm text-slate-600">01713-487903</p>
                   </div>
                 </div>
@@ -239,8 +294,12 @@ export default function Navbar() {
                     <Stethoscope className="w-4 h-4 text-emerald-600" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Doctor Info</p>
-                    <p className="text-sm font-bold text-slate-800">01756-203720</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                      Doctor Info
+                    </p>
+                    <p className="text-sm font-bold text-slate-800">
+                      01756-203720
+                    </p>
                     <p className="text-sm text-slate-600">01713-487901</p>
                   </div>
                 </div>

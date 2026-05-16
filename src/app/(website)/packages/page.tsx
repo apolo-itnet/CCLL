@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { CheckCircle2, Tag, Search } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import HealthPackageModal from "@/components/website/HealthPackageModal";
 
 interface Package {
   _id: string;
@@ -17,22 +18,44 @@ interface Package {
   isFeatured: boolean;
 }
 
-export default function PackagesPage() {
+function PackagesContent() {
+  const searchParams = useSearchParams();
+  const packageIdParam = searchParams.get("packageId");
+
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/packages")
       .then((r) => r.json())
-      .then((d) => { if (d.success) setPackages(d.data); })
+      .then((d) => {
+        if (d.success) {
+          setPackages(d.data);
+          // Auto-open modal if packageId in URL
+          if (packageIdParam) {
+            const pkg = d.data.find((p: Package) => p._id === packageIdParam);
+            if (pkg) {
+              setSelectedPackage(pkg);
+              setIsModalOpen(true);
+            }
+          }
+        }
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [packageIdParam]);
 
   const filtered = packages.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     p.category.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handlePackageClick = (pkg: Package) => {
+    setSelectedPackage(pkg);
+    setIsModalOpen(true);
+  };
 
   return (
     <>
@@ -75,7 +98,8 @@ export default function PackagesPage() {
                 <motion.div key={pkg._id}
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="relative bg-white border border-slate-200 hover:border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+                  onClick={() => handlePackageClick(pkg)}
+                  className="relative cursor-pointer bg-white border border-slate-200 hover:border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
                   {pkg.isFeatured && (
                     <div className="absolute -top-3 left-6">
                       <span className="bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
@@ -110,10 +134,14 @@ export default function PackagesPage() {
                         <p className="text-2xl font-bold text-blue-600">৳{pkg.price}</p>
                       )}
                     </div>
-                    <Link href="/contact"
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePackageClick(pkg);
+                      }}
                       className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all">
-                      Contact Us
-                    </Link>
+                      View Details
+                    </button>
                   </div>
                 </motion.div>
               ))}
@@ -121,6 +149,26 @@ export default function PackagesPage() {
           )}
         </div>
       </section>
+
+      <HealthPackageModal
+        package={selectedPackage}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </>
+  );
+}
+
+export default function PackagesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <PackagesContent />
+    </Suspense>
   );
 }

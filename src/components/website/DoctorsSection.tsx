@@ -67,25 +67,29 @@ export default function DoctorsSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.07 }}
-                className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:shadow-blue-50 border border-slate-100 hover:border-blue-100 transition-all duration-300"
               >
-                <div className="aspect-square bg-slate-100 overflow-hidden">
-                  {doctor.image ? (
-                    <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <User className="w-16 h-16 text-slate-300" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-slate-800 text-sm group-hover:text-blue-600 transition-colors line-clamp-1">{doctor.name}</h3>
-                  <p className="text-blue-600 text-xs mt-0.5 line-clamp-1">{doctor.specialty}</p>
-                  <p className="text-slate-400 text-xs mt-0.5">{doctor.department}</p>
-                  {doctor.visitingHours && (
-                    <p className="text-slate-500 text-xs mt-2 bg-slate-50 rounded-lg px-2 py-1">{doctor.visitingHours}</p>
-                  )}
-                </div>
+                <Link
+                  href={`/doctors?doctorId=${doctor._id}`}
+                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:shadow-blue-50 border border-slate-100 hover:border-blue-100 transition-all duration-300 block h-full cursor-pointer"
+                >
+                  <div className="aspect-square bg-slate-100 overflow-hidden">
+                    {doctor.image ? (
+                      <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User className="w-16 h-16 text-slate-300" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-slate-800 text-sm group-hover:text-blue-600 transition-colors line-clamp-1">{doctor.name}</h3>
+                    <p className="text-blue-600 text-xs mt-0.5 line-clamp-1">{doctor.specialty}</p>
+                    <p className="text-slate-400 text-xs mt-0.5">{doctor.department}</p>
+                    {doctor.visitingHours && (
+                      <p className="text-slate-500 text-xs mt-2 bg-slate-50 rounded-lg px-2 py-1">{doctor.visitingHours}</p>
+                    )}
+                  </div>
+                </Link>
               </motion.div>
             ))}
           </div>
