@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Tag } from "lucide-react";
+import { ArrowRight, Tag } from "lucide-react";
+import Image from "next/image";
 
 interface Package {
   _id: string;
@@ -24,11 +25,9 @@ export default function PackagesSection() {
   useEffect(() => {
     fetch("/api/packages")
       .then((r) => r.json())
-      .then((d) => { if (d.success) setPackages(d.data.filter((p: Package) => p.isFeatured).slice(0, 3)); })
+      .then((d) => { if (d.success) setPackages(d.data.slice(0, 4)); })
       .finally(() => setLoading(false));
   }, []);
-
-  if (!loading && packages.length === 0) return null;
 
   return (
     <section className="py-20 bg-white">
@@ -49,68 +48,99 @@ export default function PackagesSection() {
           </Link>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading
-            ? [...Array(3)].map((_, i) => (
-                <div key={i} className="bg-slate-50 rounded-2xl p-6 animate-pulse">
-                  <div className="h-6 bg-slate-200 rounded mb-3 w-3/4" />
-                  <div className="h-4 bg-slate-100 rounded mb-6" />
-                  <div className="space-y-2 mb-6">
-                    {[...Array(4)].map((_, j) => <div key={j} className="h-3 bg-slate-100 rounded" />)}
-                  </div>
-                  <div className="h-10 bg-slate-200 rounded-xl" />
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-slate-50 rounded-2xl overflow-hidden animate-pulse">
+                <div className="w-full h-48 bg-slate-200" />
+                <div className="p-4 space-y-3">
+                  <div className="h-5 bg-slate-200 rounded w-3/4" />
+                  <div className="h-4 bg-slate-100 rounded" />
+                  <div className="h-10 bg-slate-200 rounded-xl mt-4" />
                 </div>
-              ))
-            : packages.map((pkg, i) => (
-                <motion.div
-                  key={pkg._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="relative bg-white border border-slate-200 hover:border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:shadow-blue-50 transition-all duration-300"
-                >
-                  {pkg.isFeatured && (
-                    <div className="absolute -top-3 left-6">
-                      <span className="bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-                        <Tag className="w-3 h-3" /> Featured
-                      </span>
-                    </div>
-                  )}
-                  <h3 className="font-bold text-slate-800 text-lg mb-2">{pkg.name}</h3>
-                  <p className="text-slate-500 text-sm mb-4 line-clamp-2">{pkg.description}</p>
+              </div>
+            ))}
+          </div>
+        ) : packages.length === 0 ? (
+          <div className="text-center py-12 bg-slate-50 rounded-2xl">
+            <p className="text-slate-400">No packages available yet.</p>
+            <p className="text-slate-300 text-sm mt-1">Add packages from the dashboard.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {packages.map((pkg, i) => (
+              <motion.div
+                key={pkg._id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative bg-white border border-slate-200 hover:border-blue-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-blue-100 transition-all duration-300 cursor-pointer"
+              >
+                {/* Featured Badge */}
+                {pkg.isFeatured && (
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                      <Tag className="w-3 h-3" /> Featured
+                    </span>
+                  </div>
+                )}
 
-                  <ul className="space-y-2 mb-6">
-                    {pkg.tests.slice(0, 5).map((test) => (
-                      <li key={test} className="flex items-center gap-2 text-sm text-slate-600">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                        {test}
-                      </li>
-                    ))}
-                    {pkg.tests.length > 5 && (
-                      <li className="text-sm text-blue-600 font-medium">+{pkg.tests.length - 5} more tests</li>
+                {/* Image */}
+                <Link href={`/packages?packageId=${pkg._id}`}>
+                  <div className="w-full h-48 bg-slate-100 overflow-hidden">
+                    {pkg.image ? (
+                      <Image
+                        src={pkg.image}
+                        alt={pkg.name}
+                        width={300}
+                        height={200}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100">
+                        <span className="text-slate-300 text-sm">No image</span>
+                      </div>
                     )}
-                  </ul>
+                  </div>
+                </Link>
 
-                  <div className="flex items-center justify-between">
-                    <div>
+                {/* Content */}
+                <div className="p-4 space-y-3">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-base group-hover:text-blue-600 transition-colors line-clamp-1">
+                      {pkg.name}
+                    </h3>
+                    <p className="text-slate-500 text-xs mt-1 line-clamp-2">{pkg.description}</p>
+                  </div>
+
+                  {/* Footer with Pricing Left + Button Right */}
+                  <div className="flex items-end justify-between pt-2 border-t border-slate-100">
+                    {/* Pricing - Left */}
+                    <div className="flex flex-col">
                       {pkg.discountPrice > 0 ? (
                         <>
-                          <p className="text-slate-400 text-sm line-through">৳{pkg.price}</p>
-                          <p className="text-2xl font-bold text-blue-600">৳{pkg.discountPrice}</p>
+                          <p className="text-slate-400 text-xs line-through">৳{pkg.price}</p>
+                          <p className="text-xl font-bold text-blue-600">৳{pkg.discountPrice}</p>
                         </>
                       ) : (
-                        <p className="text-2xl font-bold text-blue-600">৳{pkg.price}</p>
+                        <p className="text-xl font-bold text-blue-600">৳{pkg.price}</p>
                       )}
                     </div>
-                    <Link href="/contact"
-                      className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all">
-                      Book Now
+
+                    {/* View Details Button - Right */}
+                    <Link
+                      href={`/packages?packageId=${pkg._id}`}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all"
+                    >
+                      View Details
                     </Link>
                   </div>
-                </motion.div>
-              ))}
-        </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
