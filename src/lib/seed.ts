@@ -22,10 +22,6 @@ async function seed() {
     password: hashedPassword,
     role: "admin",
   });
-
-  console.log("✅ Admin created successfully!");
-  console.log("Email: admin@ccll.com");
-  console.log("Password: Admin@1234");
   process.exit(0);
 }
 

@@ -85,8 +85,7 @@ export default function NewsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this news?")) return;
-    setDeleting(id);
+        setDeleting(id);
     const res = await fetch(`/api/news/${id}`, { method: "DELETE" });
     const data = await res.json();
     if (data.success) fetchNews();

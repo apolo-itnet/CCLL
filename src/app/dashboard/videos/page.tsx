@@ -65,8 +65,7 @@ export default function VideosPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this video?")) return;
-    setDeleting(id);
+        setDeleting(id);
     const res = await fetch(`/api/videos/${id}`, { method: "DELETE" });
     const data = await res.json();
     if (data.success) fetchVideos();

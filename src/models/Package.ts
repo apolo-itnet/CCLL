@@ -1,5 +1,23 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export const PACKAGE_CATEGORIES = [
+  "Blood Test",
+  "Urine Test",
+  "Imaging & Radiology",
+  "Cardiology",
+  "Diabetes Screening",
+  "Full Body Checkup",
+  "Women's Health",
+  "Men's Health",
+  "Child Health",
+  "Cancer Screening",
+  "Liver & Kidney",
+  "Thyroid",
+  "Allergy Test",
+  "Corporate Package",
+  "Other",
+];
+
 export interface IPackage extends Document {
   name: string;
   description: string;
@@ -22,7 +40,7 @@ const PackageSchema = new Schema<IPackage>(
     price: { type: Number, required: true },
     discountPrice: { type: Number, default: 0 },
     tests: [{ type: String }],
-    category: { type: String, required: true },
+    category: { type: String, required: true, enum: PACKAGE_CATEGORIES, default: "Other" },
     image: { type: String, default: "" },
     cloudinaryId: { type: String, default: "" },
     isActive: { type: Boolean, default: true },
