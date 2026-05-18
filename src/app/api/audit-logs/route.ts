@@ -7,14 +7,15 @@ export async function GET(req: NextRequest) {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
-    const model = searchParams.get("model") || "Doctor";
+    const model = searchParams.get("model"); // null or empty = all models
     const documentId = searchParams.get("documentId");
     const userId = searchParams.get("userId");
     const action = searchParams.get("action");
-    const limit = parseInt(searchParams.get("limit") || "50");
+    const limit = parseInt(searchParams.get("limit") || "200");
     const page = parseInt(searchParams.get("page") || "1");
 
-    const filter: any = { model };
+    const filter: any = {};
+    if (model && model.trim()) filter.model = model; // only filter if model provided
     if (documentId) filter.documentId = documentId;
     if (userId) filter.userId = userId;
     if (action) filter.action = action;

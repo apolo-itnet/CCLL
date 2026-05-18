@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, Package, Images, Newspaper, TrendingUp } from "lucide-react";
+import { Users, Package, Images, Newspaper, TrendingUp, MessageSquareWarning, Building2, Quote } from "lucide-react";
 import Link from "next/link";
 
 interface Stats {
@@ -10,6 +10,9 @@ interface Stats {
   packages: number;
   gallery: number;
   news: number;
+  complaints: number;
+  corporateClients: number;
+  testimonials: number;
 }
 
 const statCards = [
@@ -17,6 +20,9 @@ const statCards = [
   { label: "Health Packages", key: "packages", icon: Package, color: "emerald", href: "/dashboard/packages" },
   { label: "Gallery Photos", key: "gallery", icon: Images, color: "purple", href: "/dashboard/gallery" },
   { label: "News & Media", key: "news", icon: Newspaper, color: "amber", href: "/dashboard/news" },
+  { label: "Complaints", key: "complaints", icon: MessageSquareWarning, color: "red", href: "/dashboard/complaints" },
+  { label: "Corporate Clients", key: "corporateClients", icon: Building2, color: "sky", href: "/dashboard/corporate" },
+  { label: "Testimonials", key: "testimonials", icon: Quote, color: "pink", href: "/dashboard/testimonials" },
 ];
 
 const colorMap: Record<string, string> = {
@@ -24,10 +30,13 @@ const colorMap: Record<string, string> = {
   emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   purple: "bg-purple-500/10 text-purple-400 border-purple-500/20",
   amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  red: "bg-red-500/10 text-red-400 border-red-500/20",
+  sky: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+  pink: "bg-pink-500/10 text-pink-400 border-pink-500/20",
 };
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<Stats>({ doctors: 0, packages: 0, gallery: 0, news: 0 });
+  const [stats, setStats] = useState<Stats>({ doctors: 0, packages: 0, gallery: 0, news: 0, complaints: 0, corporateClients: 0, testimonials: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

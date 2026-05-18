@@ -14,17 +14,11 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-
         await connectDB();
-        const user = await User.findOne({ email: credentials.email });
+        const user = await User.findOne({ email: credentials.email, isActive: true });
         if (!user) return null;
-
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+        const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
-
         return {
           id: user._id.toString(),
           name: user.name,
@@ -50,11 +44,7 @@ export const authOptions: AuthOptions = {
       return session;
     },
   },
-  pages: {
-    signIn: "/login",
-  },
-  session: {
-    strategy: "jwt",
-  },
+  pages: { signIn: "/login" },
+  session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
 };

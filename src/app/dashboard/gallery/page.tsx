@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, X, Upload, Pencil } from "lucide-react";
+import toast from "react-hot-toast";
+import { confirmDelete } from "@/components/dashboard/DeleteConfirm";
 
 interface GalleryItem {
   _id: string;
@@ -87,12 +89,13 @@ export default function GalleryPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this photo?")) return;
-    setDeleting(id);
-    const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
-    const data = await res.json();
-    if (data.success) fetchPhotos();
-    setDeleting(null);
+    confirmDelete("এই photo টি delete করবেন?", async () => {
+      setDeleting(id);
+      const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) { toast.success("Photo deleted!"); fetchPhotos(); }
+      setDeleting(null);
+    });
   };
 
   return (

@@ -3,27 +3,29 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Pencil, Trash2, Search, X, Upload } from "lucide-react";
+import toast from "react-hot-toast";
+import { confirmDelete } from "@/components/dashboard/DeleteConfirm";
+import { useRole } from "@/hooks/useRole";
+
+const PACKAGE_CATEGORIES = [
+  "Blood Test","Urine Test","Imaging & Radiology","Cardiology",
+  "Diabetes Screening","Full Body Checkup","Women's Health","Men's Health",
+  "Child Health","Cancer Screening","Liver & Kidney","Thyroid",
+  "Allergy Test","Corporate Package","Other",
+];
 
 interface Package {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  discountPrice: number;
-  tests: string[];
-  category: string;
-  image: string;
-  isActive: boolean;
-  isFeatured: boolean;
-  order: number;
+  _id: string; name: string; description: string; price: number; discountPrice: number;
+  tests: string[]; category: string; image: string; isActive: boolean; isFeatured: boolean; order: number;
 }
 
 const emptyForm = {
   name: "", description: "", price: 0, discountPrice: 0,
-  tests: "", category: "General", isActive: true, isFeatured: false, order: 0,
+  tests: "", category: "Other", isActive: true, isFeatured: false, order: 0,
 };
 
 export default function PackagesPage() {
+  const { canDelete, canEdit } = useRole();
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -45,87 +47,50 @@ export default function PackagesPage() {
     setLoading(false);
   };
 
-  const openAdd = () => {
-    setEditPkg(null);
-    setForm(emptyForm);
-    setImageFile(null);
-    setImagePreview("");
-    setShowModal(true);
-  };
-
+  const openAdd = () => { setEditPkg(null); setForm(emptyForm); setImageFile(null); setImagePreview(""); setShowModal(true); };
   const openEdit = (pkg: Package) => {
     setEditPkg(pkg);
-    setForm({
-      name: pkg.name, description: pkg.description,
-      price: pkg.price, discountPrice: pkg.discountPrice,
-      tests: pkg.tests.join("\n"), category: pkg.category,
-      isActive: pkg.isActive, isFeatured: pkg.isFeatured, order: pkg.order,
-    });
-    setImagePreview(pkg.image || "");
-    setImageFile(null);
-    setShowModal(true);
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    setForm({ name: pkg.name, description: pkg.description, price: pkg.price, discountPrice: pkg.discountPrice,
+      tests: pkg.tests.join("\n"), category: pkg.category, isActive: pkg.isActive, isFeatured: pkg.isFeatured, order: pkg.order });
+    setImagePreview(pkg.image || ""); setImageFile(null); setShowModal(true);
   };
 
   const handleSubmit = async () => {
+    if (!form.name.trim()) { toast.error("Package name is required!"); return; }
     setSaving(true);
     try {
       let imageUrl = editPkg?.image || "";
       let cloudinaryId = (editPkg as any)?.cloudinaryId || "";
-
       if (imageFile) {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        formData.append("folder", "ccll/packages");
-        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-        const uploadData = await uploadRes.json();
-        if (uploadData.success) {
-          imageUrl = uploadData.url;
-          cloudinaryId = uploadData.publicId;
-        }
+        const fd = new FormData(); fd.append("file", imageFile); fd.append("folder", "ccll/packages");
+        const r = await fetch("/api/upload", { method: "POST", body: fd });
+        const d = await r.json();
+        if (d.success) { imageUrl = d.url; cloudinaryId = d.publicId; }
+        else { toast.error("Image upload failed!"); setSaving(false); return; }
       }
-
-      const payload = {
-        ...form,
-        tests: form.tests.split("\n").filter((t) => t.trim()),
-        image: imageUrl,
-        cloudinaryId,
-      };
-
+      const payload = { ...form, tests: form.tests.split("\n").filter((t) => t.trim()), image: imageUrl, cloudinaryId };
       const url = editPkg ? `/api/packages/${editPkg._id}` : "/api/packages";
-      const method = editPkg ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
+      const res = await fetch(url, { method: editPkg ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const data = await res.json();
-      if (data.success) { fetchPackages(); setShowModal(false); }
-    } finally {
-      setSaving(false);
-    }
+      if (data.success) {
+        toast.success(editPkg ? "Package updated! 🎉" : "Package added! ✅");
+        fetchPackages(); setShowModal(false);
+      } else { toast.error(data.error || "Failed to save"); }
+    } catch { toast.error("Network error!"); } finally { setSaving(false); }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this package?")) return;
-    setDeleting(id);
-    const res = await fetch(`/api/packages/${id}`, { method: "DELETE" });
-    const data = await res.json();
-    if (data.success) fetchPackages();
-    setDeleting(null);
+  const handleDelete = (id: string, name: string) => {
+    confirmDelete(`"${name}" package delete করবেন?`, async () => {
+      setDeleting(id);
+      const res = await fetch(`/api/packages/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) { toast.success("Package deleted!"); fetchPackages(); }
+      else toast.error(data.error || "Delete failed!");
+      setDeleting(null);
+    });
   };
 
-  const filtered = packages.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = packages.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div>
@@ -134,7 +99,7 @@ export default function PackagesPage() {
           <h2 className="text-2xl font-bold text-white">Health Packages</h2>
           <p className="text-slate-400 text-sm mt-1">{packages.length} total packages</p>
         </div>
-        <button onClick={openAdd} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all">
+        <button onClick={openAdd} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer">
           <Plus className="w-4 h-4" /> Add Package
         </button>
       </div>
@@ -145,15 +110,13 @@ export default function PackagesPage() {
           className="w-full bg-slate-900 border border-slate-800 text-white placeholder-slate-500 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-        <table className="w-full">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-x-auto">
+        <table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b border-slate-800">
-              <th className="text-left text-slate-400 text-xs font-medium px-6 py-4">Package</th>
-              <th className="text-left text-slate-400 text-xs font-medium px-6 py-4">Category</th>
-              <th className="text-left text-slate-400 text-xs font-medium px-6 py-4">Price</th>
-              <th className="text-left text-slate-400 text-xs font-medium px-6 py-4">Status</th>
-              <th className="text-left text-slate-400 text-xs font-medium px-6 py-4">Actions</th>
+              {["Package","Category","Price","Status","Actions"].map((h) => (
+                <th key={h} className="text-left text-slate-400 text-xs font-medium px-5 py-4">{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -164,21 +127,21 @@ export default function PackagesPage() {
             ) : filtered.map((pkg) => (
               <motion.tr key={pkg._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                <td className="px-6 py-4">
+                <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
-                    {pkg.image && <img src={pkg.image} alt={pkg.name} className="w-10 h-10 rounded-xl object-cover" />}
+                    {pkg.image && <img src={pkg.image} alt={pkg.name} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />}
                     <div>
                       <p className="text-white text-sm font-medium">{pkg.name}</p>
                       <p className="text-slate-400 text-xs">{pkg.tests?.length || 0} tests</p>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-slate-300 text-sm">{pkg.category}</td>
-                <td className="px-6 py-4">
+                <td className="px-5 py-4 text-slate-300 text-sm">{pkg.category}</td>
+                <td className="px-5 py-4">
                   <p className="text-white text-sm font-medium">৳{pkg.price}</p>
                   {pkg.discountPrice > 0 && <p className="text-emerald-400 text-xs">৳{pkg.discountPrice} offer</p>}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-5 py-4">
                   <div className="flex flex-col gap-1">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium w-fit ${pkg.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"}`}>
                       {pkg.isActive ? "Active" : "Inactive"}
@@ -186,14 +149,23 @@ export default function PackagesPage() {
                     {pkg.isFeatured && <span className="px-2.5 py-1 rounded-full text-xs font-medium w-fit bg-amber-500/10 text-amber-400">Featured</span>}
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-5 py-4">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => openEdit(pkg)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all">
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={() => handleDelete(pkg._id)} disabled={deleting === pkg._id} className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {canEdit && (
+                      <button onClick={() => openEdit(pkg)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all cursor-pointer">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    {canDelete ? (
+                      <button onClick={() => handleDelete(pkg._id, pkg.name)} disabled={deleting === pkg._id}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 text-slate-700 cursor-not-allowed">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </div>
+                    )}
                   </div>
                 </td>
               </motion.tr>
@@ -210,10 +182,9 @@ export default function PackagesPage() {
               className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between p-6 border-b border-slate-800">
                 <h3 className="text-white font-semibold">{editPkg ? "Edit Package" : "Add Package"}</h3>
-                <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+                <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-white transition-colors cursor-pointer"><X className="w-5 h-5" /></button>
               </div>
               <div className="p-6 space-y-4">
-                {/* Image */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Image</label>
                   <div className="flex items-center gap-4">
@@ -223,30 +194,29 @@ export default function PackagesPage() {
                     </div>
                     <label className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-sm cursor-pointer transition-all">
                       <Upload className="w-4 h-4" /> Upload Image
-                      <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                      <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); } }} className="hidden" />
                     </label>
                   </div>
                 </div>
-
-                {[
-                  { label: "Package Name", key: "name", placeholder: "Basic Health Checkup" },
-                  { label: "Category", key: "category", placeholder: "General" },
-                ].map(({ label, key, placeholder }) => (
-                  <div key={key}>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">{label}</label>
-                    <input type="text" placeholder={placeholder} value={(form as any)[key]}
-                      onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
-                ))}
-
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Package Name</label>
+                  <input type="text" placeholder="Basic Health Checkup" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Category</label>
+                  <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    {PACKAGE_CATEGORIES.map((c: string) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
-                  <textarea placeholder="Package description..." value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3}
+                  <textarea placeholder="Package description..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3}
                     className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Regular Price (৳)</label>
@@ -259,14 +229,11 @@ export default function PackagesPage() {
                       className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Tests Included (one per line)</label>
-                  <textarea placeholder={"CBC\nBlood Sugar\nLiver Function"} value={form.tests}
-                    onChange={(e) => setForm({ ...form, tests: e.target.value })} rows={5}
+                  <textarea placeholder={"CBC\nBlood Sugar\nLiver Function"} value={form.tests} onChange={(e) => setForm({ ...form, tests: e.target.value })} rows={5}
                     className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
                 </div>
-
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Order</label>
@@ -277,24 +244,22 @@ export default function PackagesPage() {
                     <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
                     <select value={form.isActive ? "true" : "false"} onChange={(e) => setForm({ ...form, isActive: e.target.value === "true" })}
                       className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                      <option value="true">Active</option>
-                      <option value="false">Inactive</option>
+                      <option value="true">Active</option><option value="false">Inactive</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Featured</label>
                     <select value={form.isFeatured ? "true" : "false"} onChange={(e) => setForm({ ...form, isFeatured: e.target.value === "true" })}
                       className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                      <option value="false">No</option>
-                      <option value="true">Yes</option>
+                      <option value="false">No</option><option value="true">Yes</option>
                     </select>
                   </div>
                 </div>
               </div>
               <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-800">
-                <button onClick={() => setShowModal(false)} className="px-4 py-2 text-slate-400 hover:text-white text-sm transition-colors">Cancel</button>
+                <button onClick={() => setShowModal(false)} className="px-4 py-2 text-slate-400 hover:text-white text-sm transition-colors cursor-pointer">Cancel</button>
                 <button onClick={handleSubmit} disabled={saving}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white px-6 py-2 rounded-xl text-sm font-medium transition-all">
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white px-6 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer">
                   {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : editPkg ? "Update Package" : "Add Package"}
                 </button>
               </div>

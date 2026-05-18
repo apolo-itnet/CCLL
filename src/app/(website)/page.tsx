@@ -3,6 +3,8 @@ import ServicesSection from "@/components/website/ServicesSection";
 import DoctorsSection from "@/components/website/DoctorsSection";
 import PackagesSection from "@/components/website/PackagesSection";
 import NewsSection from "@/components/website/NewsSection";
+import CorporateClients from "@/components/website/CorporateClients";
+import TestimonialsSection from "@/components/website/TestimonialsSection";
 
 export default function HomePage() {
   return (
@@ -12,6 +14,8 @@ export default function HomePage() {
       <DoctorsSection />
       <PackagesSection />
       <NewsSection />
+      <CorporateClients />
+      <TestimonialsSection />
     </>
   );
 }
